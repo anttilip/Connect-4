@@ -14,15 +14,12 @@ class Board:
         return [[' ' for x in range(n)] for x in range(m)]
 
     def print_board(self):
-        print ''  # empty line
+        print ''
         numbers = [str(x) for x in range(1, self.n + 1)]
         print ' ' + ' '.join(numbers)
 
         for row in self.board:
-            s = '|'
-            for cell in row:
-                s += cell + '|'
-            print s
+            print '|' + '|'.join(row) + '|'
 
     def place_piece(self, move, player):
         for row in reversed(self.board):

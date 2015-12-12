@@ -1,43 +1,38 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from random import randint
 from Board import Board
+from Players import HumanPlayer, AIPlayer
 
 
-def main():
+def play():
     board = Board()
-    play(board)
+    human = HumanPlayer()
+    ai = AIPlayer()
 
+    print "Let's play connect four!\nTo place a move, type a number [1-7]"
 
-def play(board):
-    print "Let's play four in a row\nTo place a move, type a number [1-7]"
+    current_player = human
 
     while not board.game_over:
         board.print_board()
-        p_move = int(raw_input())
-        board.place_piece(p_move, 'X')
 
-        if board.game_over:
-            print 'Game over'
-            game_over()
+        move_allowed = False
+        while not move_allowed:
+            move_allowed = board.place_piece(current_player.get_move(),
+                                             current_player.sign)
 
-        c_move = comp_move(board)
-        board.place_piece(c_move, 'O')
+        # current_player = ai if current_player is human else human     # maybe confusing?
+        if current_player is human:
+            current_player = ai
+        else:
+            current_player = human
 
     print 'Game over'
-    game_over()
-
-
-def comp_move(board):
-    return randint(1, 7)
-
-
-def game_over():
     ans = raw_input('Do you want to play again? y/n\n')
+
     if ans.lower() == 'y':
-        main()
+        play()
     else:
         raise SystemExit(0)
 
-
-main()
+play()
