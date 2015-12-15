@@ -7,7 +7,7 @@ from Players import HumanPlayer, AIPlayer
 def play():
     board = Board()
     human = HumanPlayer()
-    ai = AIPlayer('Y')
+    ai = AIPlayer()
 
     print "Let's play connect four!\nTo place a move, type a number [1-7]"
 
