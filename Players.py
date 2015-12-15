@@ -4,7 +4,7 @@ from random import randint
 from Negamax import Negamax
 
 
-class HumanPlayer():
+class HumanPlayer:
     is_ai = False
 
     def __init__(self, sign='X'):
@@ -22,13 +22,13 @@ class HumanPlayer():
     def is_valid(self, move, board):
         try:
             move = int(move)
-        except:
+        except ValueError:
             return False
 
         return 0 < move <= board.width
 
 
-class AIPlayer():
+class AIPlayer:
     is_ai = True
 
     def __init__(self, sign='O'):

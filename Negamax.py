@@ -7,7 +7,7 @@ needed, because Connect Four has around 5*10^12 different possible games.
 """
 
 
-class Negamax():
+class Negamax:
 
     def pef(self, board):
         """Position evaluation function counts and weighs longest connected 
