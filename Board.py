@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from termcolor import colored   # mahollisesti poista et toimii kaikilla
+from termcolor import colored   # possibly remove for compatibility
 
 
 class Board:
@@ -9,65 +9,78 @@ class Board:
         self.width = width
         self.height = height
         self.board = self.build_board(width, height)
-        self.game_over = False
+        self.undo_stack = []
 
     def build_board(self, width, height):
-        return [[' ' for x in range(width)] for x in range(height)]
+        return [[' ' for x in range(width)] for y in xrange(height)]
 
-    def print_board(self):
-        print ''
-        numbers = [str(x) for x in range(1, self.width + 1)]
-        print colored(' ' + ' '.join(numbers), 'cyan')
-
-        for row in self.board:
-            print colored('|', 'red') + colored('|', 'red').join(row) + colored('|', 'red')
-
-    def place_piece(self, move, curr_player, opponent):
+    def place_piece(self, move, curr_sign):
         for row in reversed(self.board):
             if row[move-1] == ' ':
-                row[move-1] = curr_player.sign
-                self.game_over = self.is_gameover(curr_player, opponent)
+                row[move-1] = curr_sign
+                self.undo_stack.append(move - 1)
                 return True
 
         print 'Not allowed'
         return False
 
-    def is_gameover(self, curr_player, opponent):
-        curr_sign = curr_player.sign
-        opp_sign = opponent.sign
+    def is_gameover(self, curr_sign, opponent_sign):
+        for indexes in self.segment_indexes():
 
-        segments = self.segments()
+            # indexes contains four board indexes as tuples
+            segment = ''.join([self.board[index[0]][index[1]] for index in indexes])
 
-        for s in segments:
-            if 4*curr_sign in s or 4*opp_sign in s:
-                if curr_player.is_ai:
-                    # Comp won
-                    print 'You lost!'
-                else:
-                    # Player won
-                    print 'You won!'
-                return True
+            if segment == 4 * curr_sign:
+                return True, curr_sign
+            elif segment == 4 * opponent_sign:
+                return True, opponent_sign
 
-        return False
+            if not self.is_legal_moves_left():
+                # If tie game, no winner is returned
+                return True, None
 
-    def segments(self):
-        rows = []
+        # If game is not over, no winner is returned
+        return False, None
+
+    def undo(self):
+        try:
+            value = self.undo_stack.pop()
+        except IndexError:
+            print 'Nothing to undo'
+            return False
         for row in self.board:
-            rows.append(''.join(row))
+            if not row[value] == ' ':
+                row[value] = ' '
+                return value
 
-        columns = []
-        for column in range(self.width):
-            s = ''
-            for row in self.board:
-                s += row[column]
-            columns.append(s)
+    def segment_indexes(self):
 
-        up = [''.join([self.board[x][y] for x in range(self.height) for y in range(self.width)
-              if x+y == z]) for z in range(3, 9)]
+        # Get indexes from rows, columns and diagonal lines and combine them to segments
+        rows = [[(y, x) for x in range(self.width)] for y in range(self.height)]
+        columns = [[(x, y) for x in range(self.height)] for y in range(self.width)]
 
-        down = [''.join([self.board[x][y] for x in range(self.height) for y in range(self.width)
-                if x-y == z]) for z in range(-3, 3)]
+        up = [[(x, y) for x in xrange(self.height) for y in xrange(self.width)
+               if x + y == z] for z in xrange(3, 9)]
+        down = [[(x, y) for x in xrange(self.height) for y in xrange(self.width)
+                 if x - y == z] for z in xrange(-3, 3)]
 
         segments = rows + columns + up + down
 
-        return segments
+        # Split segments to smaller, 4 length pieces
+        # These are every possible chain of four in the game
+        # Each element in returned list is a list of indexes (which are tuples)
+
+        return [segments[x][i:i+4] for x in range(len(segments)) for i in range(len(segments[x])-3)]
+
+    def is_legal_moves_left(self):
+        return ' ' in [self.board[0][x] for x in xrange(self.width)]
+
+    def __str__(self):
+        numbers = [str(x) for x in xrange(1, self.width + 1)]
+        print colored(' ' + ' '.join(numbers), 'cyan')
+
+        s = ''
+        for row in self.board:
+            s += colored('|', 'red') + colored('|', 'red').join(row) + colored('|\n', 'red')
+
+        return s

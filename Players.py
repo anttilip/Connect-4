@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from random import randint
 from Negamax import Negamax
 
 
 class HumanPlayer:
     is_ai = False
 
-    def __init__(self, sign='X'):
+    def __init__(self, sign):
         self.sign = sign
 
-    def get_move(self, board):
+    def get_move(self, board, opponent):
         while True:
             move = raw_input()
             if self.is_valid(move, board):
@@ -19,7 +18,8 @@ class HumanPlayer:
 
         return int(move)
 
-    def is_valid(self, move, board):
+    @staticmethod
+    def is_valid(move, board):
         try:
             move = int(move)
         except ValueError:
@@ -31,9 +31,10 @@ class HumanPlayer:
 class AIPlayer:
     is_ai = True
 
-    def __init__(self, sign='O'):
+    def __init__(self, sign):
         self.sign = sign
 
-    def get_move(self, board):
-        print Negamax().pef(board)
-        return randint(1, 7)
+    def get_move(self, board, opponent):
+        n = Negamax(board, 4)
+        move, _ = n.negamax(board, self.sign, opponent.sign)
+        return move

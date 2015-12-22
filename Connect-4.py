@@ -6,35 +6,38 @@ from Players import HumanPlayer, AIPlayer
 
 def play():
     board = Board()
-    human = HumanPlayer()
-    ai = AIPlayer()
+    player1 = HumanPlayer('X')
+    player2 = AIPlayer('O')
 
     print "Let's play connect four!\nTo place a move, type a number [1-7]"
 
-    current_player = human
-    other_player = ai
+    current_player = player1
+    other_player = player2
 
-    while not board.game_over:
-        board.print_board()
+    winner = None
+    game_over = False
+
+    while not game_over:
+        print board
 
         move_allowed = False
         while not move_allowed:
-            move_allowed = board.place_piece(current_player.get_move(board),
-                                             current_player, other_player)
+            move = current_player.get_move(board, other_player)
+            move_allowed = board.place_piece(move, current_player.sign)
 
-        if current_player is human:
-            current_player = ai
-            other_player = human
-        else:
-            current_player = human
-            other_player = ai
+        game_over, winner = board.is_gameover(current_player.sign, other_player.sign)
+        current_player, other_player = other_player, current_player
 
-    print 'Game over'
+    print board
+    if winner:
+        print winner, 'won!\nGame over'
+    else:
+        print 'Tie game!'
+
     ans = raw_input('Do you want to play again? y/n\n')
 
     if ans.lower() == 'y':
         play()
-    else:
-        raise SystemExit(0)
+
 
 play()
