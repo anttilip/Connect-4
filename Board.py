@@ -8,38 +8,24 @@ class Board:
     def __init__(self, width=7, height=6):
         self.width = width
         self.height = height
-        self.board = self.build_board(width, height)
+        self.board = self.__build_board(width, height)
         self.undo_stack = []
+        self.segment_indexes = self.__segment_indexes()
+        self.__segment_indexes_by_index = self.__segment_indexes_by_index()
 
-    def build_board(self, width, height):
+    def __build_board(self, width, height):
         return [[' ' for x in range(width)] for y in xrange(height)]
 
-    def place_piece(self, move, curr_sign):
-        for row in reversed(self.board):
-            if row[move-1] == ' ':
-                row[move-1] = curr_sign
+    def try_place_piece(self, move, curr_sign):
+        """Tries to put piece to board. Returns True if move is possible and row the piece was put"""
+        for i in xrange(len(self.board)):
+            row = self.height - i - 1   # Pieces are added from bottom to up
+            if self.board[row][move-1] == ' ':
+                self.board[row][move-1] = curr_sign
                 self.undo_stack.append(move - 1)
-                return True
+                return True, row
 
-        print 'Not allowed'
-        return False
-
-    def is_gameover(self, curr_sign, opponent_sign):
-        for indexes in self.segment_indexes():
-
-            # indexes contains four board indexes as tuples
-            segment = ''.join([self.board[index[0]][index[1]] for index in indexes])
-
-            if segment == 4 * curr_sign:
-                return True, curr_sign
-            elif segment == 4 * opponent_sign:
-                return True, opponent_sign
-
-            if not self.is_legal_moves_left():
-                # If tie game, no winner is returned
-                return True, None
-
-        # If game is not over, no winner is returned
+        # print 'Not allowed'
         return False, None
 
     def undo(self):
@@ -53,7 +39,37 @@ class Board:
                 row[value] = ' '
                 return value
 
-    def segment_indexes(self):
+    def is_game_over(self, board, curr_sign, opponent_sign, move=None):
+        if move:
+            # Check if specific move causes game over (specific case)
+            col, row = move
+            for indexes in self.__segment_indexes_by_index[row * 7 + col]:
+                # indexes contains four board indexes as tuples
+                segment = ''.join([board[index[0]][index[1]] for index in indexes])
+
+                if segment == 4 * curr_sign:
+                    return True, curr_sign
+                elif segment == 4 * opponent_sign:
+                    return True, opponent_sign
+        else:
+            # Check if game is over (general case)
+            for indexes in self.segment_indexes:
+                # indexes contains four board indexes as tuples
+                segment = ''.join([self.board[index[0]][index[1]] for index in indexes])
+
+                if segment == 4 * curr_sign:
+                    return True, curr_sign
+                elif segment == 4 * opponent_sign:
+                    return True, opponent_sign
+
+        if not self.__is_legal_moves_left():
+            # If tie game, no winner is returned
+            return True, None
+
+        # If game is not over, no winner is returned
+        return False, None
+
+    def __segment_indexes(self):
 
         # Get indexes from rows, columns and diagonal lines and combine them to segments
         rows = [[(y, x) for x in range(self.width)] for y in range(self.height)]
@@ -72,8 +88,20 @@ class Board:
 
         return [segments[x][i:i+4] for x in range(len(segments)) for i in range(len(segments[x])-3)]
 
-    def is_legal_moves_left(self):
-        return ' ' in [self.board[0][x] for x in xrange(self.width)]
+    def __segment_indexes_by_index(self):
+        segment_indexes_by_index = [[] for x in xrange(self.width * self.height)]
+        for col in xrange(self.width):
+            for row in xrange(self.height):
+                for index in self.segment_indexes:
+                    if (col, row) in index:
+                        segment_indexes_by_index[col*7 + row].append(index)
+
+        return segment_indexes_by_index
+
+    def __is_legal_moves_left(self, board=None):
+        if board is None:
+            board = self.board
+        return ' ' in [board[0][x] for x in xrange(self.width)]
 
     def __str__(self):
         numbers = [str(x) for x in xrange(1, self.width + 1)]
@@ -84,3 +112,8 @@ class Board:
             s += colored('|', 'red') + colored('|', 'red').join(row) + colored('|\n', 'red')
 
         return s
+
+    def __hash__(self):
+        tmp = str(self.board)
+        return hash(tmp)
+
