@@ -7,7 +7,7 @@ from Players import HumanPlayer, AIPlayer
 def play():
     board = Board()
     player1 = HumanPlayer('X')
-    player2 = AIPlayer('O', 5)
+    player2 = AIPlayer('O', 6)
 
     print "Let's play connect four!\nTo place a move, type a number [1-7]"
 
@@ -25,12 +25,13 @@ def play():
             move = current_player.get_move(board, other_player)
             move_allowed = board.try_place_piece(move, current_player.sign)
 
-        game_over, winner = board.is_game_over(board.board, current_player.sign, other_player.sign)
+        game_over, winner = board.is_game_over(board.board, current_player.sign,
+                                               other_player.sign)
         current_player, other_player = other_player, current_player
 
     print board
     if winner:
-        print winner, 'won!\nGame over'
+        print "Computer ", 'won!\nGame over'
     else:
         print 'Tie game!'
 

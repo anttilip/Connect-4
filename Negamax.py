@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-""" 
-This heuristic algorithm is based on negamax, which is a variant of a minimax algorithm.
-Negamax can be used due to zero-sum property of Connect-4. Heuristic algorithm is 
-needed, because Connect Four has around 4*10^12 (4 trillion) different possible games.
+"""This heuristic algorithm is based on negamax, which is a variant of a minimax
+algorithm.Negamax can be used due to zero-sum property of Connect-4. Heuristic
+algorithm is needed, because Connect Four has around 4*10^12 (4 trillion)
+different possible games.
 """
 
 
@@ -36,7 +36,8 @@ class Negamax:
             if not move_allowed:
                 continue
 
-            game_over, winner = board.is_game_over(board.board, curr_sign, opponent_sign, (move-1, row))
+            game_over, winner = board.is_game_over(board.board, curr_sign,
+                                                   opponent_sign, (move-1, row))
             if game_over:
                 if winner == curr_sign:
                     best_subscore = 9999999999
@@ -45,7 +46,10 @@ class Negamax:
                 else:
                     best_subscore = 0
             else:
-                best_submove, best_subscore = self.__negamax(board, opponent_sign, curr_sign, depth + 1)
+                best_submove, best_subscore = self.__negamax(board,
+                                                             opponent_sign,
+                                                             curr_sign,
+                                                             depth + 1)
                 best_subscore *= -1
             board.undo()
 
@@ -62,7 +66,8 @@ class Negamax:
         return best_move, best_score
 
     def __evaluate(self, board, curr_sign, opponent_sign):
-        """Counts and weighs longest connected checker chains which can lead to win"""
+        """Counts and weighs longest connected checker chains
+        which can lead to win"""
 
         curr_score = 0
         opp_score = 0
@@ -99,4 +104,3 @@ class Negamax:
 
 # TODO:
 #    - Prefer games that win faster or lose later
-
