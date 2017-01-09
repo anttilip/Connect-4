@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from termcolor import colored   # possibly remove for compatibility
+try:
+    from termcolor import colored
+    colored_imported = True
+except ImportError:
+    colored_imported = False
 
 
 class Board:
@@ -105,11 +109,17 @@ class Board:
 
     def __str__(self):
         numbers = [str(x) for x in xrange(1, self.width + 1)]
-        print colored(' ' + ' '.join(numbers), 'cyan')
+        if colored_imported:
+            print colored(' ' + ' '.join(numbers), 'cyan')
+        else:
+            print ' ' + ' '.join(numbers)
 
         s = ''
         for row in self.board:
-            s += colored('|', 'red') + colored('|', 'red').join(row) + colored('|\n', 'red')
+            if colored_imported:
+                s += colored('|', 'red') + colored('|', 'red').join(row) + colored('|\n', 'red')
+            else:
+                s += '|' + '|'.join(row) + '|\n'
 
         return s
 
